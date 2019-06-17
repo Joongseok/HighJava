@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+
+
+<BorderPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="basic.menuTest.MenuController">
+   <top>
+      <MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+        <menus>
+          <Menu fx:id="fileMenu" mnemonicParsing="false" text="파일">
+            <items>
+              <MenuItem fx:id="newFileMenuItem" mnemonicParsing="false" onAction="#newFIleAction" text="새로만들기" />
+                  <MenuItem fx:id="openMenuItem" mnemonicParsing="false" onAction="#openMenuAction" text="열기" />
+                  <MenuItem fx:id="changeNameSaveMenuItem" mnemonicParsing="false" onAction="#changeNameSaveAction" text="다른 이름으로 저장" />
+                  <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitAction" text="끝내기" />
+            </items>
+          </Menu>
+        </menus>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+         <padding>
+            <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+         </padding>
+      </MenuBar>
+   </top>
+   <center>
+      <TextArea fx:id="txtArea" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </BorderPane.margin>
+      </TextArea>
+   </center>
+</BorderPane>

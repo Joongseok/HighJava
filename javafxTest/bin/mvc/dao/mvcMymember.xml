@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 이 문서는 SQL문을 직접 처리할 수 있는 내용을 기술하는 문서입니다. -->
+<!DOCTYPE sqlMap
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<!-- 
+	namespace속성 : 아래에서 작성한 SQL문을 호출할 때 같이 사용한다.
+ -->	
+<sqlMap namespace="mvcMymember">
+	<!-- 
+		개별 sql문 처리 문서에서 사용할 typeAlias를 지정할 수 있다.
+	 -->
+	<typeAlias alias="memVo" type="mvc.vo.MemberVO"/>
+	<!--
+		이 영엑에 SQL문에 맞는 태그를 사용하여 처리할 SQL문을 기술한다.
+		
+		사용할 수 있는 기본적인 태그들
+		<select> ~~~ </select>
+		<insert> ~~~ </insert>
+		<update> ~~~ </update>
+		<delete> ~~~ </delete>
+	  ==============================================
+	  	위 태그에서 사용되는 속성들
+	  	1) id속성 : 해당 태그를 호출할 떄 <sqlMap>태그의 namespace속성값과
+	  				같이 연결하여 사용하는 이름
+	  	2) parameterClass속성 : sql문에 사용될 데이터가 들어있는 개체를 지정한다.
+	  				(보통 VO클래스, 자바의 자료형이름 등이 사용된다.)
+	  	3) resultClass속성 : select문을 실행한 결과를 담을 객체를 지정한다.
+	  				(보통 VO클래스, 자바의 자료형이름 등이 사용된다.)
+	  -->
+	  <insert id="insertMember" parameterClass="mvc.vo.MemberVO">
+	  <!-- sqlDeveloper 에 mymember 테이블에 하나의 멤버정보를 insert한다 -->
+	  	insert into mymember (mem_id, mem_name, mem_tel, mem_addr)
+	  	values ( #mem_id#, #mem_name#, #mem_tel#, #mem_addr#)
+	  </insert>
+	  
+	  <!-- parameterClass나 REsultClass에 alias로 설정할 수 있다. -->
+	  <update id="updateMember" parameterClass="memVo">
+	  	update mymember set mem_name = #mem_name#,
+	  		 mem_tel = #mem_tel#, mem_addr = #mem_addr#
+	  	where mem_id = #mem_id#
+	  </update>
+	  <!-- 
+	  	parameterClass에 설정되는 값이 단일값(즉, 1개의 데이터)이면
+	  	SQL문에 이 값을 나타내는 변수는 특별히 이름이 정해지지 않았다.
+	  	즉, 사용자가 임의로 지정할 수 있다.
+	   -->
+	  <delete id="deleteMember" parameterClass="string">
+	  <!-- string 값인 memId를 daoImpl에서 받아와서 Query문을 수행한다. -->
+	  	<!-- delete from mymember where mem_id = #mem_id# -->
+	  	 delete from mymember where mem_id = #mem_id# 
+	  </delete>
+
+		
+	  <select id="getAllMember" resultClass="memVo">
+	  <!-- select문은 resultClass를 사용한다.memVo의 정보를 반환해줘야 하기 때문에   select * from mymember mymember테이블에 있는 모든 정보를 검색한다.-->
+	  		select * from mymember
+	  </select>
+<!-- 	  <select id="getMember" resultClass="memVo" parameterClass="string"> -->
+<!-- 	  		select * from mymember where mem_id = #mem_id# -->
+<!-- 	  </select> -->
+
+	  <select id="getMemberCount" resultClass="int" parameterClass="string">
+	  <!-- select count(*) cnt from mymember where mem_id =#mem_id# 매개변수로 받아온 memId가 있으면 count가 올라가고 없으면 count는 -1을 반환한다. 그렇기 떄문에 resultClass의 값은 int이어야함 -->
+	  		select count(*) from mymember where mem_id = #mem_id#
+	  </select>
+	  
+	  
+	  <!-- 
+	  		파라미터로 가져온 값을 컬럼명등의 자리에 사용할 경우에는
+	  		#기호 대신 $기호를 사용하여 나타낸다.
+	   -->
+		<!-- 매개변수로 map을 받았기떄문에 parameterClass의 값은 map이어야함 반환은 리스트에 반환해주는것이기 떄문에 memVo를 넘겨준다. -->
+	  <select id = "getSearchMember" parameterClass="map" resultClass="memVo">
+	  		SELECT *
+	  		FROM MYMEMBER<!-- mymember테이블에 담겨있는 모든 정보를 검색한다. -->
+	  		WHERE $searchFieldName$ LIKE '%' || #searchValue# || '%' <!-- 매개변수로 받아온 값을 컬럼명의 자리에 사용할때는 $기호를 사용함 -->
+	  		<!-- map의 객체에서 가져온 항목값인 searchFieldName이라는 키에서 LIKE 맵의 value키값인 searchValue를 담는다. -->
+	  		<!-- ex) seachFieldName ==> 회원ID항목을 가짐 searchValue ==> a
+	  					결과 ==> mem_id LIKE %a%
+	  					해석 : mem_id 에서 a가 들어간 모든 항목을 result해준다. -->
+	  </select>
+
+
+</sqlMap>

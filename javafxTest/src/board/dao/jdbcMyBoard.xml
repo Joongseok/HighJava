@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 이 문서는 SQL문을 직접 처리할 수 있는 내용을 기술하는 문서입니다. -->
+<!DOCTYPE sqlMap
+	PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<!-- 
+	namespace속성 : 아래에서 작성한 SQL문을 호출할 때 같이 사용한다.
+	DaoImpl에서 메서드 호출할때 "namespace.태그 id"
+ -->	
+<sqlMap namespace="jdbcMyBoard">
+	<!-- 
+		개별 sql문 처리 문서에서 사용할 typeAlias를 지정할 수 있다.
+	 -->
+	<typeAlias alias="boardVo" type="board.vo.JdbcBoardVO"/>
+	<!--
+		이 영엑에 SQL문에 맞는 태그를 사용하여 처리할 SQL문을 기술한다.
+		
+		사용할 수 있는 기본적인 태그들
+		<select> ~~~ </select>
+		<insert> ~~~ </insert>
+		<update> ~~~ </update>
+		<delete> ~~~ </delete>
+	  ==============================================
+	  	위 태그에서 사용되는 속성들
+	  	1) id속성 : 해당 태그를 호출할 떄 <sqlMap>태그의 namespace속성값과
+	  				같이 연결하여 사용하는 이름
+	  	2) parameterClass속성 : sql문에 사용될 데이터가 들어있는 개체를 지정한다.
+	  				(보통 VO클래스, 자바의 자료형이름 등이 사용된다.)
+	  	3) resultClass속성 : select문을 실행한 결과를 담을 객체를 지정한다.
+	  				(보통 VO클래스, 자바의 자료형이름 등이 사용된다.)
+	  -->
+	  <insert id="insertBoard" parameterClass="boardVo">
+		  	INSERT INTO JDBC_BOARD
+		  		( BOARD_NO
+		  		 ,BOARD_TITLE
+		  		 ,BOARD_WRITER
+		  		 ,BOARD_DATE
+		  		 ,BOARD_CNT
+		  		 ,BOARD_CONTENT )
+		  	VALUES
+		  		( board_seq.nextval <!-- sqlDeveloper에서 이미 board_seq를 만들어 줬기때문에 시퀀스.nextval을 통해 증가시킨다. -->
+		  		 ,#board_title#
+		  		 ,#board_writer#
+		  		 ,sysdate<!-- 처음에 jdbc_board 테이블을 생성할때 board_date의 데이타 타입을 date로 줬기때문에 sysdate를 통해 생성할때 오늘의 날짜로 초기화해준다.  -->
+		  		 ,0<!-- 조회수는 처음에 생성될때 0이기 때문에 0으로 초기화 -->
+		  		 ,#board_content#)
+	  		
+	  </insert>
+	  <!-- List타입에 반환해줘야 하기때문에 List의 제네릭타입이 vo이기 떄문에 resultClass에 boardVo를 반환해준다.  -->
+	  <select id="getAllBoard" resultClass="boardVo">
+	  		SELECT BOARD_NO<!-- 보드의 번호 : 게시글번호 -->
+	  			  ,BOARD_TITLE<!-- 보드의 제목 : 제목 -->
+	  			  ,BOARD_WRITER<!-- 보드의 작성자 -->
+	  			  ,TO_CHAR(BOARD_DATE, 'YYYY-MM-DD') BOARD_DATE<!-- to_char(board_date, 'YYYY-MM-DD') 알리야스 board_date  보드의 날짜 --> 
+	  			  ,BOARD_CNT <!-- 보드의 조회수 -->
+	  			  ,BOARD_CONTENT <!-- 보드의 내용 -->
+	  		FROM   JDBC_BOARD <!-- jdbc_board테이블에서 -->
+	  		ORDER BY BOARD_NO DESC <!-- board_no에 역순으로 받아온다. -->
+	  			
+	  </select>
+		<!-- daoImpl에서 받아온 매개변수가 int타입의 boardNo이기 때문에 parameterClass는 int -->
+	  <select id="getBoard" resultClass="boardVo" parameterClass="int">
+	  		SELECT BOARD_NO
+	  			  ,BOARD_TITLE
+	  			  ,BOARD_WRITER
+	  			  ,TO_CHAR(BOARD_DATE, 'YYYY-MM-DD') BOARD_DATE
+	  			  ,BOARD_CNT
+	  			  ,BOARD_CONTENT
+	  		FROM   JDBC_BOARD
+	  		WHERE  BOARD_NO = #board_No#<!--board_No의 즉 게시글 번호에 대한 정보를 가진것을 resultClass boardVo로 넘겨준다.  -->
+	  </select>
+
+		<!-- daoImpl에서 받아온 board_title은 string 값이기 때문에 parameterClass는 string값 List의 제네릭타입이 boardvo이기 떄문에 resultClass는 boardVo -->
+	  <select id = "getSearchBoardList" parameterClass="string" resultClass="boardVo">
+	  		SELECT BOARD_NO
+	  			  ,BOARD_TITLE
+	  			  ,BOARD_WRITER
+	  			  ,TO_CHAR(BOARD_DATE, 'YYYY-MM-DD') BOARD_DATE
+	  			  ,BOARD_CNT
+	  			  ,BOARD_CONTENT
+	  		FROM   JDBC_BOARD
+	  		WHERE  BOARD_TITLE LIKE '%' || #board_title# || '%' <!-- 받아온 parameterClass인 board_title이 속한 것에 대해 정보들을 출력한다. -->
+	  		ORDER BY BOARD_NO DESC
+	  </select>
+	  
+	   <!-- 
+	  		파라미터로 가져온 값을 컬럼명등의 자리에 사용할 경우에는
+	  		#기호 대신 $기호를 사용하여 나타낸다.
+	   -->
+		<!-- 매개변수로 map을 받았기떄문에 parameterClass의 값은 map이어야함 반환은 리스트에 반환해주는것이기 떄문에 memVo를 넘겨준다. -->
+	  <select id = "getSearchBoard" parameterClass="map" resultClass="boardVo">
+	  		SELECT *
+	  		FROM JDBC_BOARD<!-- mymember테이블에 담겨있는 모든 정보를 검색한다. -->
+	  		WHERE $searchFieldName$ LIKE '%' || #searchValue# || '%' <!-- 매개변수로 받아온 값을 컬럼명의 자리에 사용할때는 $기호를 사용함 -->
+	  		<!-- map의 객체에서 가져온 항목값인 searchFieldName이라는 키에서 LIKE 맵의 value키값인 searchValue를 담는다. -->
+	  		<!-- ex) seachFieldName ==> 회원ID항목을 가짐 searchValue ==> a
+	  					결과 ==> mem_id LIKE %a%
+	  					해석 : mem_id 에서 a가 들어간 모든 항목을 result해준다. -->
+	  </select>
+	  
+	  
+	  <!-- 받아온 boardNo이 int 타입이기때문에 parameterClass는 int -->
+	  <update id="setCountIncrement" parameterClass="int">
+	  		UPDATE JDBC_BOARD
+	  		SET	   BOARD_CNT = BOARD_CNT+1
+	  		WHERE  BOARD_NO = #board_no#<!-- parameterClass로 받아온 해당 게시글 번호의 board_cnt를 1증가시켜준다. -->
+	  </update>
+	  
+	  <!-- DaoImpl에서 받아온 boardVo의 정보를 query문으로 셋팅해준다. -->
+	  <update id="updateBoard" parameterClass="boardVo">
+	  		UPDATE  JDBC_BOARD 
+	  		SET 	BOARD_TITLE = #board_title# 
+				   ,BOARD_DATE = SYSDATE
+				   ,BOARD_CONTENT = #board_content#
+			WHERE   BOARD_NO = #board_no#
+	  </update>
+	  
+	  
+	  <delete id="deleteBoard" parameterClass="int"><!-- 매개변수로 받은 board_no은 int타입이다. -->
+		  	 DELETE 
+		  	 FROM  JDBC_BOARD  
+		  	 WHERE BOARD_NO = #board_no# 
+	  </delete>
+
+	  
+	
+
+</sqlMap>
